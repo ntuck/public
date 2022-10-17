@@ -1,0 +1,8 @@
+"","source","organ","neg","pos","sum","link"
+"1","dililist","liver",511,768,1279,"https://www.fda.gov/science-research/liver-toxicity-knowledge-base-ltkb/drug-induced-liver-injury-rank-dilirank-dataset"
+"2","dilirank","liver",338,698,1036,"https://pubmed.ncbi.nlm.nih.gov/31669330/"
+"3","ctd_liver","liver",8147,139,8286,"http://ctdbase.org/detail.go;jsessionid=210B3A0E6DBC2DDB2E05F30CA00CB42C?type=disease&acc=MESH%3AD056486&view=chem"
+"4","kidney_drugbank","kidney",0,217,217,"https://go.drugbank.com/indications/DBCOND0028362"
+"5","neuro_dnt","neuro",13,53,66,"https://academic.oup.com/toxsci/article/187/1/62/6529553"
+"6","cancer_ntp","cancer",223,531,754,"https://ice.ntp.niehs.nih.gov/DATASETDESCRIPTION"
+"7","cancer_ncintp","cancer",6188,1959,8147,"https://files.toxplanet.com/cpdb/pdfs/Documentation_for_Excel.pdf"

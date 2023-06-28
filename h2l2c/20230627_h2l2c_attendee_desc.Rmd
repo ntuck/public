@@ -1,0 +1,279 @@
+---
+title: "h2l2c Attendee Info"
+author: "Nyssa Tucker"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: true 
+    number_sections: true  
+    theme: darkly  
+    highlight: pygments  
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+library(viridis)
+library(wordcloud)
+library(tm)
+library(tidyverse)
+
+
+```
+
+# Goal  
+Characterize attendees for h2l2c course
+
+# Demographics
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+df <- as_tibble(read_tsv("C:/Users/nynat/Documents/GitHub/cautious-giggle/other/h2l2c/20230628_h2l2cR.tsv"))
+#print(colnames(df))
+
+colnames(df) <- c("name","email","time","email2","name2","onyen",
+                  "dept","self_id","prev_code_xp","prev_code_xp2","research",
+                  "data_need","file_types","excel_freq","excel_for",
+                  "prog_goals","h2l2c_goals","h2l2c_elab","lang","course_times",
+                  "misc","register","status")
+
+#print(colnames(df))
+```
+
+## Dpt
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+tab <- unique(df$dept)
+kable(tab)
+
+tab <- table(df$dept)
+#kable(tab)
+
+```
+
+## Title
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+tab <- as_tibble(as.data.frame(table(df$self_id)))
+tab <- arrange(tab,-tab$Freq)
+#kable(tab)
+student_tot <- sum(tab$Freq)
+tab %>% ggplot(aes(fct_reorder(Var1,Freq),Freq,
+                   fill  = Freq)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis() +
+  theme_bw() + 
+  theme(legend.position="none") +
+  xlab("") +
+  ggplot2::annotate("text", x = 4, y = 5, label = paste("total students: ",student_tot))
+```
+
+  
+# Familiarity with Programming  
+
+## Excel
+### Excel Freq  
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+
+tab <- as_tibble(as.data.frame(table(df$excel_freq)))
+tab <- arrange(tab,-tab$Freq)
+kable(tab)
+
+```
+
+### Excel Use
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+tab <- table(df$excel_for)
+#kable(tab)
+
+d_types <- df$excel_for%>% str_split(pattern = ", ")
+
+
+d_ts <- d_types[[1]] %>% append(d_types[[2]])
+out_length <- length(d_types)
+for(i in 3:out_length){
+d_ts <- d_ts %>% append(d_types[[i]])
+
+}
+
+#d_types2 <- as_tibble(as.data.frame(table(d_ts)))
+
+tab <- as_tibble(as.data.frame(table(d_ts)))
+tab <- arrange(tab,-tab$Freq)
+#kable(tab)
+tab %>% ggplot(aes(fct_reorder(d_ts,Freq),Freq,
+                   fill  = Freq)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis() +
+  theme_bw() + 
+  theme(legend.position="none") +
+  xlab("") 
+
+```
+
+## Coding Langs
+
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+
+{
+prev_xp <- df$prev_code_xp %>% 
+  str_split(pattern = ", ")
+
+prev_xp1 <- prev_xp[lengths(prev_xp) == 1]
+prev_xp1 <- prev_xp1  %>% as_tibble(.name_repair = "unique") %>% t()
+colnames(prev_xp1) <- c("resp1")
+prev_xp1 <- prev_xp1 %>% as_tibble()
+prev_xp1$resp2 <- NA
+prev_xp1$resp3 <- NA
+
+prev_xp2 <- prev_xp[lengths(prev_xp) == 2]
+prev_xp2 <- prev_xp2 %>% as.data.frame() %>% t() %>% as_tibble(.name_repair = "unique") 
+colnames(prev_xp2) <- c("resp1","resp2")
+prev_xp2 <- prev_xp2 %>% as_tibble()
+prev_xp2$resp3 <- NA
+
+
+prev_xp3 <- prev_xp[lengths(prev_xp) == 3]
+prev_xp3 <- prev_xp3 %>% as.data.frame() %>% t() %>% as_tibble(.name_repair = "unique") 
+colnames(prev_xp3) <- c("resp1","resp2","resp3")
+
+prev_xpf <- prev_xp1 %>% rbind(prev_xp2)
+
+prev_xpf <- prev_xpf %>% rbind(prev_xp3)
+
+
+
+prevs <- prev_xpf$resp1
+prevs <- prevs %>% append(prev_xpf$resp2)
+prevs <- prevs %>% append(prev_xpf$resp3)
+
+prevs <- prevs %>% as_tibble()}
+
+#kable(prev_xpf)
+
+
+```
+
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+tab <- table(df$prev_code_xp)
+#kable(tab)
+
+
+tab <- as_tibble(as.data.frame(table(prevs$value)))
+tab <- arrange(tab,-tab$Freq)
+kable(tab)
+tab %>% ggplot(aes(fct_reorder(Var1,Freq),Freq,
+                   fill  = Freq)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis() +
+  theme_bw() + 
+  theme(legend.position="none") +
+  xlab("") 
+
+```
+
+# Needed Data Types
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+tab <- table(df$file_types)
+#kable(tab)
+
+d_types <- df$file_types%>% str_split(pattern = ", ")
+
+
+d_ts <- d_types[[1]] %>% append(d_types[[2]])
+out_length <- length(d_types)
+for(i in 3:out_length){
+d_ts <- d_ts %>% append(d_types[[i]])
+
+}
+
+#d_types2 <- as_tibble(as.data.frame(table(d_ts)))
+
+tab <- as_tibble(as.data.frame(table(d_ts)))
+tab <- arrange(tab,-tab$Freq)
+#kable(tab)
+tab %>% ggplot(aes(fct_reorder(d_ts,Freq),Freq,
+                   fill  = Freq)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis() +
+  theme_bw() + 
+  theme(legend.position="none") +
+  xlab("") 
+
+```
+
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+### Specific areas
+tab <- table(df$data_need)
+#kable(tab)
+
+
+```
+
+
+# Attendee Goals
+
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+tab <- table(df$h2l2c_goals)
+#kable(tab)
+
+write_csv(as_tibble(df[c("onyen","h2l2c_goals")]),
+          "C:/Users/nynat/Documents/GitHub/cautious-giggle/other/h2l2c/20230628_h2l2cR_goals.csv")
+
+```
+
+
+```{r,message=FALSE,warning=FALSE,error=FALSE,fig.height=3,fig.width=3}
+
+df_cloud <- as_tibble(read_csv("C:/Users/nynat/Documents/GitHub/cautious-giggle/other/h2l2c/20230628_h2l2cR_goals.csv"))
+
+words_cl <- df_cloud$h2l2c_goals
+words_cl2 <- words_cl %>% str_split(pattern = " ")
+
+words_cl3 <- append(words_cl2[[1]],words_cl2[[2]])
+out_length <- length(words_cl2)
+for(i in 3:out_length){
+words_cl3 <- append(words_cl3, words_cl2[[i]])
+
+}
+words_cl4 <- words_cl3 %>% tolower() %>% removePunctuation()
+words_cl4 <- words_cl4[words_cl4 != "is"]
+words_cl4 <- words_cl4[words_cl4 != "i"]
+words_cl4 <- words_cl4[words_cl4 != "as"]
+words_cl4 <- words_cl4[words_cl4 != "of"]
+words_cl4 <- words_cl4[words_cl4 != "in"]
+words_cl4 <- words_cl4[words_cl4 != "and"]
+words_cl4 <- words_cl4[words_cl4 != "to"]
+words_cl4 <- words_cl4[words_cl4 != "a"]
+words_cl4 <- words_cl4[words_cl4 != "the"]
+
+freq <- as_tibble(as.data.frame(table(words_cl4)))
+#freq <- freq %>% filter(Freq <= 9)
+
+wordcloud(freq$words_cl4,freq$Freq)#,scale=c(4,.5),min.freq=3)
+
+
+```
+
+
+# fin
+
+
+
+
+fin
+
+
